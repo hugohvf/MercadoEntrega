@@ -5,6 +5,7 @@ import React from 'react';
 import Orders from './pages/orders';
 import ClientOrder from './pages/clientOrder';
 import LoadingScreen from './pages/loadingScreen';
+import Dones from './pages/dones';
 
 
 const RootStack = createStackNavigator({
@@ -20,11 +21,19 @@ const RootStack = createStackNavigator({
             title: "Pedidos:",
             headerLeft: () => <View></View>
         },
+    },
+    Dones: {
+        screen: Dones,
+        navigationOptions: {
+            title: "Pedidos concluídos:",
+        },
+    },
     ClientOrder: {
         screen: ClientOrder,
         navigationOptions: {
 
         },
+    },
 },{
     defaultNavigationOptions: {
         headerStyle: {

@@ -5,27 +5,14 @@ import styles from "../styles";
 import api from "../services/api";
 import { AntDesign } from '@expo/vector-icons';
 
-const List = ({navigation, dispatch, orders}) => {
-    const [refreshing, setRefresh] = useState(true);
-
-    async function loadOrders() {
-        setRefresh(true)
-        response = await api.get('/order').then(setRefresh(false))
-        dispatch({type: "GET_ORDERS", value: response.data.filter(item => item.done==false)})
-        dispatch({type: "GET_ORDERS_DONE", value: response.data.filter(item => item.done==true)})
-    }
-
-    useEffect(() => {
-        
-        loadOrders()
-    }, []);
+const Dones = ({navigation, dispatch, ordersDone}) => {
 
     
 
     const renderItem = ({item, index}) => {
         return (
                 <View style={styles.card}>
-                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "undone"})}>
+                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "done"})}>
                     <View style={styles.topContainer}>
                         <Text style={styles.topText}>{item.end.nome}</Text>
                     </View>
@@ -44,23 +31,17 @@ const List = ({navigation, dispatch, orders}) => {
 
     return (
         <View style={styles.backgroundContainer} >
-            {refreshing?<ActivityIndicator style={{position: "absolute", top: "50%", left: "50%"}} color='#bfff2c' size="large" >
-            </ActivityIndicator>:<FlatList
+            <FlatList
                 style={styles.flatList}
                 contentContainerStyle={styles.list}
-                data={orders}
+                data={ordersDone}
                 keyExtractor={item => item._id.toString()}
                 renderItem={renderItem}
                 enableSnap={true}
-                refreshing={refreshing}
-                onRefresh={() => loadOrders()}
                 ItemSeparatorComponent={() => <View style={styles.separator}></View>}
-                />}
-            <TouchableOpacity style={styles.donesButton} onPress={() => navigation.navigate('Dones')}>
-                    <Text style={styles.donesText}>Concluídos</Text>
-            </TouchableOpacity>
+                />
         </View>
     );
 }
 
-export default connect(state => ({orders: state.orders}))(List);
+export default connect(state => ({ordersDone: state.ordersDone}))(Dones);
