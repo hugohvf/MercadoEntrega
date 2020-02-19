@@ -1,8 +1,10 @@
 import { createStore } from 'redux';
+import orders from '../pages/orders';
 
 const INITIAL_STATE = {
     orders: [],
     ordersDone: [],
+    position: {},
 }
 
 function reducer(state = INITIAL_STATE, action) {
@@ -54,14 +56,22 @@ function reducer(state = INITIAL_STATE, action) {
                     return item
                 })
             });
-        // case "SET_DONE":
-        //     return {
-        //         if(action.status==="done"){
-
-        //         } else {
-
-        //         }
-        //     }
+        case "SET_DONE":
+            if(action.status==="undone"){
+                return Object.assign({}, state, {
+                    orders: state.orders.filter((item) => item._id !== action.pedido._id),
+                    ordersDone: [...state.ordersDone,{...action.pedido, done: true}]
+                })
+            } else {
+                return Object.assign({}, state, {
+                    ordersDone: state.ordersDone.filter((item) => item._id !== action.pedido._id),
+                    orders: [...state.orders,{...action.pedido, done: false}]
+                })
+            }
+        case "SET_REGION":
+            return Object.assign({}, state, {
+                position: action.value,
+            })
         default:
             return state;
     }

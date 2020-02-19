@@ -12,7 +12,7 @@ const Dones = ({navigation, dispatch, ordersDone}) => {
     const renderItem = ({item, index}) => {
         return (
                 <View style={styles.card}>
-                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "done"})}>
+                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "done", pedido: ordersDone[index]})}>
                     <View style={styles.topContainer}>
                         <Text style={styles.topText}>{item.end.nome}</Text>
                     </View>

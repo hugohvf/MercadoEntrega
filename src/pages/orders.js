@@ -4,19 +4,42 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoi
 import styles from "../styles";
 import api from "../services/api";
 import { AntDesign } from '@expo/vector-icons';
+import { requestPermissionsAsync, getCurrentPositionAsync } from 'expo-location';
 
-const List = ({navigation, dispatch, orders}) => {
+const List = ({navigation, dispatch, orders, ordersDone}) => {
     const [refreshing, setRefresh] = useState(true);
+    const [currentRegion, setCurrentRegion] = useState(null);
+
 
     async function loadOrders() {
         setRefresh(true)
         response = await api.get('/order').then(setRefresh(false))
         dispatch({type: "GET_ORDERS", value: response.data.filter(item => item.done==false)})
         dispatch({type: "GET_ORDERS_DONE", value: response.data.filter(item => item.done==true)})
+
+        async function loadInitialPosition(){
+            const { granted } = await requestPermissionsAsync();
+
+            if(granted) {
+                const { coords } = await getCurrentPositionAsync({
+                    enableHighAccuracy: true,
+                });
+
+                const { latitude, longitude } = coords;
+
+                setCurrentRegion({
+                    latitude,
+                    longitude,
+                })
+
+                dispatch({type: "SET_REGION", value: {latitude, longitude}})
+            }
+        }
+
+        loadInitialPosition();
     }
 
     useEffect(() => {
-        
         loadOrders()
     }, []);
 
@@ -25,7 +48,7 @@ const List = ({navigation, dispatch, orders}) => {
     const renderItem = ({item, index}) => {
         return (
                 <View style={styles.card}>
-                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "undone"})}>
+                    <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate('ClientOrder', {index, nome: item.end.nome, type: "undone", pedido: orders[index]})}>
                     <View style={styles.topContainer}>
                         <Text style={styles.topText}>{item.end.nome}</Text>
                     </View>
@@ -63,4 +86,4 @@ const List = ({navigation, dispatch, orders}) => {
     );
 }
 
-export default connect(state => ({orders: state.orders}))(List);
+export default connect(state => ({orders: state.orders, ordersDone: state.ordersDone}))(List);

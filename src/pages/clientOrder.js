@@ -4,22 +4,18 @@ import { View, Text, FlatList, TouchableOpacity, Card, KeyboardAvoidingView, Scr
 import styles from "../styles";
 import api from "../services/api";
 import { MaterialIcons } from '@expo/vector-icons';
+import getDirections from 'react-native-google-maps-directions'
 
-const Order = ({navigation, dispatch, orders, ordersDone}) => {
+const Order = ({navigation, dispatch, orders, ordersDone, position}) => {
     var i = navigation.state.params.index;
     var type = navigation.state.params.type;
-    
-    const [lista, setLista] = useState(orders[i].lista);
-    const [pedido, setPedido] = useState(orders[i]);
+    const [click, setClick] = useState(false);
+    [pedido, setPedido] = useState(navigation.state.params.pedido);
+    [lista, setLista] = useState(navigation.state.params.pedido.lista);
+
 
     useEffect(() => {
-        if(type==="done") {
-            setLista(ordersDone[i].lista)
-            setPedido(ordersDone[i])
-        } else {
-            setLista(orders[i].lista)
-            setPedido(orders[i])
-        }
+        console.log(position);
     }, [])
 
     function handleCheckbox (index, item) {
@@ -34,11 +30,46 @@ const Order = ({navigation, dispatch, orders, ordersDone}) => {
         }
     }
 
+    function openMaps() {
+        const data = {
+            source: {
+             latitude: position.latitude,
+             longitude: position.longitude
+           },
+           destination: {
+             latitude: pedido.end.loc.latitudee,
+             longitude: pedido.end.loc.longitude
+           },
+           params: [
+             {
+               key: "travelmode",
+               value: "driving"        // may be "walking", "bicycling" or "transit" as well
+             },
+             {
+               key: "dir_action",
+               value: "navigate"       // this instantly initializes navigation using the given travel mode
+             }
+           ],
+           waypoints: [
+            {
+                latitude: pedido.end.loc.latitude,
+                longitude: pedido.end.loc.longitude
+              },
+           ]
+         }
+      
+         getDirections(data)
+    }
+
     async function sendDoneOrder (ord) {
-        // console.log(ord)
-        // let res = await api.put(`/order?id=${ord._id}`, {done: true})
-        // dispatch({type: "SET_DONE", pedido, i, status: type})
-        // console.log(res)
+        
+        if(click===false){
+        setClick(true)
+        let res = await api.put(`/order?id=${ord._id}`, {done: true})
+        dispatch({type: "SET_DONE", pedido, i, status: type}) // Log the order to be sure a filter will solve the problem
+
+        navigation.goBack();
+        } 
     }
 
     return (
@@ -46,13 +77,13 @@ const Order = ({navigation, dispatch, orders, ordersDone}) => {
             <ScrollView>
                     <View style={styles.orderContainer}>
                         <Text style={styles.bottomText}>Numero de items:  <Text style={styles.numberText}>{lista.length}</Text> </Text>
-                        <Text style={styles.bottomText}>Pedido às <Text style={styles.timeText}>{pedido.data.substr(11, 5)}</Text> do dia <Text style={styles.dateText}>{orders[i].data.substr(8, 2)}/{orders[i].data.substr(5, 2)}/{orders[i].data.substr(2, 2)}</Text></Text>
+                        <Text style={styles.bottomText}>Pedido às <Text style={styles.timeText}>{pedido.data.substr(11, 5)}</Text> do dia <Text style={styles.dateText}>{pedido.data.substr(8, 2)}/{pedido.data.substr(5, 2)}/{pedido.data.substr(2, 2)}</Text></Text>
                         <Text style={styles.bottomText}>Entregar até dia <Text style={styles.dateText}>{pedido.dataEntrega}</Text></Text>
                         <Text style={styles.bottomText}>{pedido.end.logradouro}, {pedido.end.num}</Text>
                         <Text style={styles.bottomText}>{pedido.end.comp}</Text>
                         <Text style={styles.bottomText}>{pedido.end.cidade}-{pedido.end.UF}  {pedido.end.cep}</Text>
                         <Text style={styles.bottomText}>Número de telefone: {pedido.end.tel}</Text>
-                        <TouchableOpacity  style={styles.button}>
+                        <TouchableOpacity  style={styles.button} onPress={() => openMaps()}>
                             <Text  style={styles.buttonText}>Entregar!</Text>
                         </TouchableOpacity>
                     </View>
@@ -65,12 +96,12 @@ const Order = ({navigation, dispatch, orders, ordersDone}) => {
                     <Text style={styles.itemText}>{item.desc}</Text>
                 </View>)
             })}
-            {!pedido.done?
-                    <TouchableOpacity style={styles.button2} onPress={() => sendDoneOrder(orders[i])}>
+            
+                    <TouchableOpacity style={styles.button2} onPress={() => sendDoneOrder(pedido)} disabled={click}>
 
-                            <Text  style={styles.buttonText}>Finalizar!</Text>
+                            <Text  style={styles.buttonText}>{!pedido.done?"Finalizar!":"Recuperar"}</Text>
 
-                    </TouchableOpacity>:<View></View>}
+                    </TouchableOpacity>
             </ScrollView>
         </View>     
     );
@@ -80,4 +111,4 @@ Order.navigationOptions = ({ navigation }) => ({
     title: navigation.state.params.nome,
 });
 
-export default connect(state => ({orders: state.orders, ordersDone: state.ordersDone}))(Order);
+export default connect(state => ({orders: state.orders, ordersDone: state.ordersDone, position: state.position}))(Order);
