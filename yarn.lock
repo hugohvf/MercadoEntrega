@@ -4321,6 +4321,11 @@ react-native-screens@2.0.0-alpha.12:
   dependencies:
     debounce "^1.2.0"
 
+react-native-selectable-text@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-selectable-text/-/react-native-selectable-text-1.0.2.tgz#2ac00d13eac3f7419a03d12ecdf15ed72e96619b"
+  integrity sha512-lG3WrWwuEsY5GEeikAoxSMtp+Yol2xq6hA6OmsCZWt0j8/MMDdznlPm99b3tvmMUwbnEsZaKJe6H5DQjVQASgg==
+
 react-native-status-bar-height@^2.2.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/react-native-status-bar-height/-/react-native-status-bar-height-2.4.0.tgz#de8cee4bb733a196167210d2d0bc1fa10acba3e3"

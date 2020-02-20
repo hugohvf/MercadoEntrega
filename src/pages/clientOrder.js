@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, FlatList, TouchableOpacity, Card, KeyboardAvoidingView, ScrollView} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Clipboard, ScrollView} from 'react-native';
 import styles from "../styles";
 import api from "../services/api";
 import { MaterialIcons } from '@expo/vector-icons';
-import getDirections from 'react-native-google-maps-directions'
+import getDirections from 'react-native-google-maps-directions';
 
 const Order = ({navigation, dispatch, orders, ordersDone, position}) => {
     var i = navigation.state.params.index;
@@ -80,9 +80,14 @@ const Order = ({navigation, dispatch, orders, ordersDone, position}) => {
                         <Text style={styles.bottomText}>Pedido às <Text style={styles.timeText}>{pedido.data.substr(11, 5)}</Text> do dia <Text style={styles.dateText}>{pedido.data.substr(8, 2)}/{pedido.data.substr(5, 2)}/{pedido.data.substr(2, 2)}</Text></Text>
                         <Text style={styles.bottomText}>Entregar até dia <Text style={styles.dateText}>{pedido.dataEntrega}</Text></Text>
                         <Text style={styles.bottomText}>{pedido.end.logradouro}, {pedido.end.num}</Text>
-                        <Text style={styles.bottomText}>{pedido.end.comp}</Text>
-                        <Text style={styles.bottomText}>{pedido.end.cidade}-{pedido.end.UF}  {pedido.end.cep}</Text>
-                        <Text style={styles.bottomText}>Número de telefone: {pedido.end.tel}</Text>
+                        <Text style={styles.bottomText}>Complemento: {pedido.end.comp}</Text>
+                        <Text style={styles.bottomText} >{pedido.end.cidade}-{pedido.end.UF}  {pedido.end.cep}</Text>
+                        <Text style={styles.bottomText}>Número de telefone: <Text onPress={() => {Clipboard.setString(`${pedido.end.tel}`); alert('Copiado!');}}>{pedido.end.tel}</Text></Text>
+                        <Text style={{...styles.bottomText, fontFamily: "gotham-black"}}>Observação: </Text>
+                        <Text style={styles.bottomText}>{pedido.obs.text}</Text>
+                        <Text style={{...styles.bottomText, fontFamily: "gotham-black"}}>Mercado que costuma comprar: </Text>
+                        <Text style={styles.bottomText}>{pedido.obs.market}</Text>
+                        
                         <TouchableOpacity  style={styles.button} onPress={() => openMaps()}>
                             <Text  style={styles.buttonText}>Entregar!</Text>
                         </TouchableOpacity>
@@ -98,9 +103,7 @@ const Order = ({navigation, dispatch, orders, ordersDone, position}) => {
             })}
             
                     <TouchableOpacity style={styles.button2} onPress={() => sendDoneOrder(pedido)} disabled={click}>
-
                             <Text  style={styles.buttonText}>{!pedido.done?"Finalizar!":"Recuperar"}</Text>
-
                     </TouchableOpacity>
             </ScrollView>
         </View>     
